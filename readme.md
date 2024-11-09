@@ -1,294 +1,98 @@
-const Groq = require("groq-sdk");
-if (process.env.NODE_ENV != "production") {
-  require("dotenv").config();
-}
-const CancerData = require("./models/upload.js");
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const https = require("https");
-const API_KEY = process.env.PDF_API_KEY;
-const predict = require("./AI/testModel.js");
+### Deployed Link: https://genai-ai-cancer-detection.onrender.com
+#### Note:-
+⚡ First visit may take up to 50 seconds - we're using Render's free hosting.
+Don't worry, it'll be fast and smooth after that!
 
-const cloudinary = require("cloudinary").v2;
-const express = require("express");
-const app = express();
-const mongoose = require("mongoose");
-const path = require("path");
-const methodOverride = require("method-override");
-const ejsMate = require("ejs-mate");
+# AI-Powered Cancer Detection Solution
 
-const session = require("express-session");
-const bodyParser = require("body-parser");
-const MongoStore = require("connect-mongo");
-const LocalStrategy = require("passport-local");
-const passport = require("passport");
-const flash = require("connect-flash");
+Welcome to the **AI-Powered Cancer Detection Solution** repository! This project aims to revolutionize the early detection of cancer by using cutting-edge technologies like artificial intelligence (AI), cloud storage, OCR (Optical Character Recognition), and document processing tools. Our solution allows users to upload medical images, PDF reports, or text files, which are then analyzed by our AI model to detect early signs of cancer, thus improving patient outcomes and healthcare efficiency.
 
-const multer = require("multer");
-const { storage } = require("./cloudConfig.js");
-const upload = multer({ storage });
-const dbUrl = process.env.ATLASDB_URL;
+## Purpose
 
-const store = MongoStore.create({
-  mongoUrl: dbUrl,
-  crypto: {
-    secret: process.env.SECRET,
-  },
-  touchAfter: 24 * 60 * 60,
-});
+The purpose of this project is to provide healthcare professionals with an efficient, accurate, and user-friendly tool to detect cancer at its early stages. By leveraging advanced machine learning models and powerful APIs, the solution enables quick analysis of patient reports (images, PDFs, or text) and provides timely alerts to healthcare providers for further investigation and treatment planning.
 
-store.on("error", (error) => {
-  console.log("Error in MONGO SESSION STORE: ", error);
-});
+## Project Features
 
-const sessionOptions = {
-  store,
-  secret: process.env.SECRET,
-  resave: false,
-  saveUninitialized: true,
-  cookie: {
-    expires: Date.now() + 7 * 24 * 60 * 60 * 1000,
-    maxAge: 7 * 24 * 60 * 60 * 1000,
-    httpOnly: true,
-  },
-};
+- **Upload and Analyze Medical Reports**: Users can upload images, PDF files, or text-based reports for AI-powered analysis.
+- **AI-Based Detection**: Our machine learning model scans and analyzes the uploaded reports to detect early cancer symptoms.
+- **Real-Time OCR Processing**: For scanned documents or PDFs, the Groq API extracts text, enabling accurate data retrieval.
+- **PDF to Image Conversion**: The Pdf.co API is used to convert PDF reports into images for further analysis by the AI model.
+- **Cloud Storage**: Images and reports are stored securely on the Cloudinary platform for easy access and retrieval.
 
-async function main() {
-  await mongoose.connect(dbUrl);
-}
+## Technologies Used
 
-main()
-  .then(() => {
-    console.log("Connection Succeeded");
-  })
-  .catch((err) => console.log(err));
+### Frontend:
+- **EJS/CSS/JavaScript**: The website interface is built using basic HTML, CSS, and JavaScript for user interaction and file uploads.
 
-app.use(session(sessionOptions));
-app.use(flash());
+### Backend:
+- **Cloudinary API**: Used for securely storing uploaded images and PDF reports in the cloud.
+- **Pdf.co API**: Converts PDF reports into images to enable further analysis by the AI model.
+- **Groq API**: Provides Optical Character Recognition (OCR) for extracting text from images or scanned documents, allowing deeper insights into the medical reports.
+- **Our AI Model**: A custom machine learning model trained to detect early cancer stages by analyzing medical images and text data.
+  
+## How It Works
 
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "/views"));
-app.use(express.static(path.join(__dirname, "public")));
-app.use("public/media/", express.static("./public/media"));
-app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride("_method"));
-app.engine("ejs", ejsMate);
-app.use(express.json());
-app.use((req, res, next) => {
-  res.locals.messages = req.flash();
-  next();
-});
+1. **Upload**: Users can upload either an image, PDF, or text report through the website.
+2. **OCR Processing**: If the uploaded document is a scanned image or PDF, the Groq API performs OCR to extract text data.
+3. **Conversion**: The Pdf.co API converts PDF reports into images for further AI analysis.
+4. **Analysis**: Our AI model analyzes the uploaded images or extracted data to identify potential cancer risks.
+5. **Results**: Users receive a report detailing the analysis results, highlighting any high-risk indicators or next steps.
 
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const fs = require("fs");
+## APIs & External Services
 
-const dotenv = require("dotenv");
-dotenv.config();
+- **Cloudinary API**: Stores the images and PDFs in the cloud.
+- **Pdf.co API**: Converts PDFs into images for enhanced analysis by our AI model.
+- **Groq API**: Performs OCR on images to extract important information from scanned documents.
+- **AI Model**: A machine learning model designed to detect signs of cancer from medical reports.
 
-const genAI = new GoogleGenerativeAI(process.env.API_KEY);
+## Installation and Setup
 
-function fileToGenerativePart(path, mimeType) {
-  return {
-    inlineData: {
-      data: Buffer.from(fs.readFileSync(path)).toString("base64"),
-      mimeType,
-    },
-  };
-}
+To run this project locally, follow the steps below:
 
-let port = 3000;
+1. Clone the repository:
+    ```bash
+    git clone https://github.com/yourusername/ai-cancer-detection.git
+    cd ai-cancer-detection
+    ```
 
-app.listen(port, (req, res) => {
-  console.log("Listening to the Port: http://localhost:3000/scan");
-});
+2. Install the required dependencies:
+    ```bash
+    npm install
+    ```
 
-app.get("/scan", (req, res) => {
-  res.render("index.ejs");
-});
+3. Set up environment variables for the Cloudinary API, Pdf.co API, and Groq API:
+    ```bash
+    CLOUDINARY_API_KEY=your_cloudinary_key
+    CLOUDINARY_API_SECRET=your_cloudinary_secret
+    CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
+    GROQ_API_KEY=your_groq_key
+    PDF_API_KEY=your_pdfco_key
+    ATLASDB_URL=your_mongodbatlas_url
+    ```
 
-async function reportAnalysis(report) {
-  const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-  const prompt = `Predicts the type of cancer based on the provided data. The report includes ${report}; however, for an accurate diagnosis and further evaluation, consultation with a medical professional is essential. Summarize the report in three key bullet points.`;
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const text = response.text();
-  return text;
-}
+4. Run the development server:
+    ```bash
+    node app.js
+    ```
 
-app.post("/scan", upload.single("file"), async (req, res) => {
-  try {
-    const { userName, fileType, scanType, textInput } = req.body;
-    let filePath;
-    let cancerClass;
-    let resultPdf;
-    let resultImg;
-    let extractedTextImg;
+## Usage
 
-    if (fileType === "pdf") {
-      filePath = req.file.path;
-      try {
-        let imageUrls = await convertPDFToImageFromURL(filePath);
-        if (imageUrls && imageUrls.length > 0) {
-          let extractedText = await imageToText(imageUrls[0]);
-          resultPdf = await reportAnalysis(extractedText);
-        } else {
-          throw new Error("No image URLs returned from PDF conversion");
-        }
-      } catch (e) {
-        console.error("Error processing PDF:", e);
-        throw new Error(`Failed to process PDF: ${e.message}`);
-      }
-    } else if (fileType === "image") {
-      filePath = req.file.path;
-      try {
-        resultImg = await predict(filePath);
-      } catch (e) {
-        console.error("Error processing image:", e);
-        throw new Error(`Failed to process image: ${e.message}`);
-      }
-    } else if (fileType === "text") {
-      try {
-        let result = await reportAnalysis(textInput);
-        cancerClass = [result];
-      } catch (e) {
-        console.error("Error processing text input:", e);
-        throw new Error(`Failed to process text input: ${e.message}`);
-      }
-    } else {
-      throw new Error("Invalid file type");
-    }
+1. Navigate to the main page.
+2. Choose a file type (image, PDF, or text).
+3. Upload the medical report, and the system will analyze it.
+4. Receive detailed analysis on the uploaded file.
 
-    if (fileType === "image") {
-      cancerClass = [resultImg];
-    } else if (fileType === "pdf") {
-      cancerClass = [resultPdf];
-    }
+## Future Enhancements
 
-    // Save the form data to the database
-    const formData = new CancerData({
-      userName,
-      fileType,
-      scanType,
-      filePath,
-      textInput,
-      cancerClass,
-    });
-    await formData.save();
+- **Enhanced AI Model**: Training the AI model on a broader dataset for even higher accuracy.
+- **Multilingual Support**: Expanding OCR capabilities to support multiple languages for international users.
+- **Mobile App**: Developing a mobile application to enable report uploads directly from smartphones.
 
-    req.flash("success", "Data Uploaded Successfully!");
-    res.status(200).json({
-      success: true,
-      cancerClass,
-      filePath: fileType !== "text" ? filePath : null, 
-    });
-  } catch (error) {
-    console.error("Error in /scan route:", error);
-    req.flash(
-      "error",
-      error.message || "Failed to submit form or predict cancer class"
-    );
-    res.status(500).json({
-      success: false,
-      error: error.message || "Failed to submit form or predict cancer class",
-    });
-  }
-});
+## License
 
-function convertPDFToImageFromURL(
-  pdfUrl,
-  pages = "",
-  password = "",
-  imageType = "jpg"
-) {
-  return new Promise((resolve, reject) => {
-    // Prepare URL for PDF to Image API call
-    const queryPath = `/v1/pdf/convert/to/${imageType}`;
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-    // JSON payload for API request
-    const jsonPayload = JSON.stringify({
-      password: password,
-      pages: pages,
-      url: pdfUrl,
-    });
+---
 
-    const reqOptions = {
-      host: "api.pdf.co",
-      method: "POST",
-      path: queryPath,
-      headers: {
-        "x-api-key": API_KEY,
-        "Content-Type": "application/json",
-        "Content-Length": Buffer.byteLength(jsonPayload, "utf8"),
-      },
-    };
+**Join us in our mission to improve early cancer detection and save lives!**
 
-    // Send request
-    const postRequest = https.request(reqOptions, (response) => {
-      let chunks = [];
-
-      response.on("data", (chunk) => {
-        chunks.push(chunk);
-      });
-
-      response.on("end", () => {
-        const data = JSON.parse(Buffer.concat(chunks).toString());
-        if (data.error === false) {
-          // Resolve with the URLs of the generated image files
-          resolve(data.urls);
-        } else {
-          // Reject with the error message from the API
-          reject(`Error: ${data.message}`);
-        }
-      });
-    });
-
-    postRequest.on("error", (e) => {
-      // Handle request error
-      reject(`Request error: ${e.message}`);
-    });
-
-    // Write request data
-    postRequest.write(jsonPayload);
-    postRequest.end();
-  });
-}
-
-async function imageToText(iurl) {
-  try {
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "user",
-          content:
-            "Extract the text only from the following image. Don't give any description about the image.",
-        },
-        {
-          role: "user",
-          content: [
-            {
-              type: "image_url",
-              image_url: {
-                url: iurl,
-              },
-            },
-          ],
-        },
-      ],
-      model: "llama-3.2-11b-vision-preview",
-      temperature: 0.7,
-      max_tokens: 1024,
-      top_p: 1,
-      stream: false,
-      stop: null,
-    });
-    return chatCompletion.choices[0].message.content;
-  } catch (error) {
-    console.error("Error in imageToText:", error);
-    throw error;
-  }
-}
-
-app.get("*", (req, res) => {
-  res.redirect("/scan");
-});
