@@ -8,11 +8,11 @@ const formDataSchema = new mongoose.Schema({
     },
     fileType: {
         type: String,
-        enum: ['image', 'pdf', 'text'] // Ensures only one of these values is accepted
+        enum: ['image', 'pdf', 'text'] 
     },
     scanType: {
         type: String,
-        enum: ['highLevel', 'lowLevel'] // Scan type can either be high-level or low-level
+        enum: ['highLevel', 'lowLevel'] 
     },
     filePath: {
         type: String,
@@ -21,12 +21,12 @@ const formDataSchema = new mongoose.Schema({
         type: String
     },
     cancerClass: {
-        type: [String], // Array to hold the predicted cancer class
-        default: [],    // Initialize as an empty array
+        type: [String], 
+        default: [],    
     },
     uploadDate: {
         type: Date,
-        default: Date.now // Automatically stores the date and time of upload
+        default: Date.now 
     }
 });
 
