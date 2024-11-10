@@ -44,7 +44,7 @@ app = FastAPI()
 
 def load_model(version: int):
     """Load model checkpoint based on version."""
-    checkpoint_path = f'vit_cancer_model_state_dict_{version}.pth'
+    checkpoint_path = f'/home/ubuntu/vit_cancer_model_state_dict_{version}.pth'
     model = ViTForCancerClassification(num_classes).to(device)
     model.load_state_dict(torch.load(checkpoint_path, map_location=device))
     model.eval()
